@@ -55,3 +55,70 @@
 4. Zoom 등의 화상회의 앱에서 **OBS Virtual Camera** 선택
 
 ---
+
+## 📌 코드 설명
+
+### 🎛️ 1. 반응 버튼 생성
+
+```js
+reactionButtons = [
+  new ReactionButton(20, 30, 100, 60, "인사"),
+  new ReactionButton(130, 30, 100, 60, "모자이크"),
+  new ReactionButton(240, 30, 100, 60, "박수"),
+  new ReactionButton(350, 30, 100, 60, "하트")
+];
+```
+
+- 손가락이 버튼에 닿으면 각종 반응 실행 (`trigger()` 함수)
+- `"인사"` → 화면에 `"안녕하세요"` 출력
+- `"모자이크"` → 배경 모자이크 효과
+- `"박수"`/`"하트"` → 이모지 등장 애니메이션
+
+---
+
+### ✍️ 2. 그림판 관련 버튼
+
+```js
+drawButtons = [
+  new ReactionButton(width - 120, 100, 100, 60, "그리기"),
+  new ReactionButton(width - 120, 180, 100, 60, "그리기 종료"),
+  new ReactionButton(width - 120, 260, 100, 60, "지우기")
+];
+```
+
+- `"그리기"`: 검지 손끝을 따라 그림 그리기 시작  
+- `"그리기 종료"`: 그리기 중단  
+- `"지우기"`: 지금까지 그린 선 전부 삭제
+
+```js
+if (drawing) {
+  drawingPoints.push({ x: smoothX, y: smoothY });
+}
+```
+
+---
+
+### 🎯 3. 손가락 좌표 인식 개선
+
+```js
+smoothX = lerp(smoothX, x, smoothingFactor);
+smoothY = lerp(smoothY, y, smoothingFactor);
+```
+
+- `lerp()`를 통해 좌표 튐 현상 최소화  
+- `handInViewConfidence > 0.8` 조건으로 신뢰도 높은 예측만 사용
+
+---
+
+### 📦 4. 버튼 터치 판정
+
+```js
+if (btn.isInside(smoothX, smoothY)) {
+  btn.trigger();
+}
+```
+
+- 버튼 내부에 손가락이 들어오면 이벤트 발생  
+- `margin` 값을 줘서 터치 판정을 부드럽게 처리
+
+---
