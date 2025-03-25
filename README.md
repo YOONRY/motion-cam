@@ -7,7 +7,7 @@
 
 ## 🖼️ 데모 시연
 
-https://youtu.be/8KFzKs5OZjs
+[https://youtu.be/8KFzKs5OZjs](https://youtu.be/IKfJOArA3SA)
 
 ---
 
