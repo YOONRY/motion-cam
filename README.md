@@ -160,3 +160,27 @@ if (btn.isInside(smoothX, smoothY)) {
 - `margin` 값을 추가로 줘서 터치 판정이 더 부드럽게 처리됨
 
 ---
+
+
+### 🧱 7. 모자이크 효과
+
+```js
+function mosaicEffect(videoSource) {
+  let step = 20;
+  for (let y = 0; y < video.height; y += step) {
+    for (let x = 0; x < video.width; x += step) {
+      let c = video.get(x, y);
+      fill(c);
+      rect(x, y, step, step);
+    }
+  }
+}
+```
+
+- 웹캠 영상의 픽셀을 일정 크기(step) 단위로 샘플링하여 큰 블록으로 표현
+
+- step 값이 커질수록 더 뭉개진 모자이크 효과
+
+- "모자이크" 버튼을 누르면 2초간 이 효과가 적용됨
+
+---
