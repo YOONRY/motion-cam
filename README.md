@@ -56,6 +56,19 @@
 
 ---
 
+좋아! 그럼 `README.md`의 **📌 코드 설명** 섹션에  
+👉 **하트/박수 올라오는 방식**,  
+👉 **손가락 인식 방식**,  
+👉 **손끝 좌표를 어떻게 추적하고 쓰는지**  
+이런 내용을 쉽게 이해할 수 있도록 설명 추가해줄게! 😎
+
+---
+
+### ✅ 수정/추가된 📌 코드 설명 섹션
+
+```markdown
+---
+
 ## 📌 코드 설명
 
 ### 🎛️ 1. 반응 버튼 생성
@@ -70,13 +83,60 @@ reactionButtons = [
 ```
 
 - 손가락이 버튼에 닿으면 각종 반응 실행 (`trigger()` 함수)
-- `"인사"` → 화면에 `"안녕하세요"` 출력
-- `"모자이크"` → 배경 모자이크 효과
-- `"박수"`/`"하트"` → 이모지 등장 애니메이션
+- `"인사"` → 화면 중앙에 `"안녕하세요"` 텍스트 2초간 표시
+- `"모자이크"` → 배경에 모자이크 처리 (2초간 유지)
+- `"박수"` / `"하트"` → 이모지가 **위로 떠오르는 애니메이션 효과**
 
 ---
 
-### ✍️ 2. 그림판 관련 버튼
+### 💖 2. 하트/박수 이모지 애니메이션
+
+```js
+if (showHeart) {
+  textSize(64);
+  text("❤️", width / 2, heartY);
+  heartY -= 2; // Y좌표를 점점 줄이며 위로 이동
+  if (heartY < -50) showHeart = false; // 화면 위로 사라지면 종료
+}
+```
+
+- `heartY`는 하트의 y좌표로, `draw()` 함수에서 매 프레임마다 위로 이동
+- 박수(`👏`)도 같은 방식
+- 각각 버튼을 누르면 해당 이모지를 화면 아래에서 위로 날려줌 → 간단한 애니메이션 구현
+
+---
+
+### ✋ 3. 손가락 인식 방식
+
+```js
+handposeModel = ml5.handpose(video, () => { ... });
+handposeModel.on("predict", results => predictions = results);
+```
+
+- `ml5.handpose`는 웹캠 영상에서 **손의 21개 랜드마크 좌표를 실시간 추출**
+- 손가락 중 `검지 끝 (index finger tip)`은 `landmarks[8]`에 위치
+- 손의 **위치 신뢰도(`handInViewConfidence`)가 0.8 이상일 때만 인식**
+
+---
+
+### 🎯 4. 손끝 좌표 추적 및 보정
+
+```js
+let index = landmarks[8];
+let x = index[0];
+let y = index[1];
+
+// 부드럽게 보정
+smoothX = lerp(smoothX, x, 0.7);
+smoothY = lerp(smoothY, y, 0.7);
+```
+
+- 손끝 좌표는 `smoothX, smoothY`로 부드럽게 보간(lerp) → 튐 방지
+- 이 좌표로 버튼을 터치하거나, 그림을 그림
+
+---
+
+### ✍️ 5. 그림판 관련 버튼
 
 ```js
 drawButtons = [
@@ -86,9 +146,8 @@ drawButtons = [
 ];
 ```
 
-- `"그리기"`: 검지 손끝을 따라 그림 그리기 시작  
-- `"그리기 종료"`: 그리기 중단  
-- `"지우기"`: 지금까지 그린 선 전부 삭제
+- `"그리기"`를 누르면 `drawing = true`
+- 이후 매 프레임마다 손끝 위치를 저장
 
 ```js
 if (drawing) {
@@ -96,21 +155,12 @@ if (drawing) {
 }
 ```
 
----
-
-### 🎯 3. 손가락 좌표 인식 개선
-
-```js
-smoothX = lerp(smoothX, x, smoothingFactor);
-smoothY = lerp(smoothY, y, smoothingFactor);
-```
-
-- `lerp()`를 통해 좌표 튐 현상 최소화  
-- `handInViewConfidence > 0.8` 조건으로 신뢰도 높은 예측만 사용
+- 저장된 좌표들을 선으로 연결해 실시간 드로잉
+- `"지우기"` 버튼으로 `drawingPoints` 배열을 초기화
 
 ---
 
-### 📦 4. 버튼 터치 판정
+### 📦 6. 버튼 터치 판정
 
 ```js
 if (btn.isInside(smoothX, smoothY)) {
@@ -118,7 +168,8 @@ if (btn.isInside(smoothX, smoothY)) {
 }
 ```
 
-- 버튼 내부에 손가락이 들어오면 이벤트 발생  
-- `margin` 값을 줘서 터치 판정을 부드럽게 처리
+- 버튼 객체는 `x, y, width, height`로 위치 지정됨
+- 손끝 좌표가 버튼 내부로 들어오면 `trigger()` 실행
+- `margin` 값을 추가로 줘서 터치 판정이 더 부드럽게 처리됨
 
 ---
